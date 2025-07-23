@@ -1,4 +1,3 @@
-// File: Update your existing HomeScreen.kt
 package com.yourname.fitnesstracker.ui
 
 import androidx.compose.foundation.layout.*
@@ -154,16 +153,16 @@ fun HomeScreen(
                 }
 
                 OutlinedButton(
-                    onClick = { navController.navigate("goals") },
+                    onClick = { navController.navigate("analytics") },
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Flag,
+                        imageVector = Icons.Default.Analytics,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Goals")
+                    Text("Analytics")
                 }
             }
         }

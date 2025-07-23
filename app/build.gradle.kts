@@ -118,7 +118,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // For image loading (Coil)
+    // For image loading
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.foundation:foundation")
@@ -126,4 +126,7 @@ dependencies {
 
     // For image picking
     implementation("androidx.activity:activity-compose:1.9.3")
+
+    // Extended icons
+    implementation("androidx.compose.material:material-icons-extended")
 }

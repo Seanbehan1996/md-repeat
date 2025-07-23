@@ -139,6 +139,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 dao.insertWorkout(workout)
+
+                // Check for new achievements
+                try {
+                    val database = WorkoutDatabase.getDatabase(getApplication())
+                    val analyticsRepository = AnalyticsRepository(database.workoutDao(), database.achievementDao())
+                    analyticsRepository.checkAndUnlockAchievements(workout)
+                } catch (e: Exception) {
+                    // Ignore achievement errors, just log them
+                }
+
                 loadData() // Reload workouts after insert
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

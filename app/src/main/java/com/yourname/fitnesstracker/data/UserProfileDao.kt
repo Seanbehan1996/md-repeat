@@ -1,4 +1,3 @@
-// File: app/src/main/java/com/yourname/fitnesstracker/data/UserProfileDao.kt
 package com.yourname.fitnesstracker.data
 
 import androidx.room.*

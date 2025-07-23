@@ -1,4 +1,3 @@
-// File: app/src/main/java/com/yourname/fitnesstracker/data/UserProfileRepository.kt
 package com.yourname.fitnesstracker.data
 
 import kotlinx.coroutines.flow.Flow
