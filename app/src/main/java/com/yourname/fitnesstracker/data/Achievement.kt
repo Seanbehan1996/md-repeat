@@ -11,7 +11,7 @@ import androidx.room.Index
 data class Achievement(
     val iconName: String,
     val targetValue: Int,
-    val achievedDate: String?,  // nullable
+    val achievedDate: String?,
     val achievementId: String,
     val description: String,
     val isUnlocked: Boolean,

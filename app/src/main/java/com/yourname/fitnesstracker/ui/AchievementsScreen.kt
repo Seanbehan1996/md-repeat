@@ -1,4 +1,4 @@
-// File: app/src/main/java/com/yourname/fitnesstracker/ui/AchievementsScreen.kt
+
 package com.yourname.fitnesstracker.ui
 
 import androidx.compose.foundation.background

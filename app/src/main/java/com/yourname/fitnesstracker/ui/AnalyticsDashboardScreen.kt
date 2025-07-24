@@ -1,4 +1,3 @@
-// File: app/src/main/java/com/yourname/fitnesstracker/ui/AnalyticsDashboardScreen.kt
 package com.yourname.fitnesstracker.ui
 
 import androidx.compose.foundation.Canvas

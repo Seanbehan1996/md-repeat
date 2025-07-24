@@ -1,4 +1,3 @@
-// File: app/src/main/java/com/yourname/fitnesstracker/viewmodel/UserProfileViewModel.kt
 package com.yourname.fitnesstracker.viewmodel
 
 import android.app.Application

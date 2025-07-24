@@ -190,7 +190,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun calculateCalories(steps: Int, distanceMeters: Float, durationSeconds: Int): Float {
-        // More sophisticated calorie calculation
         // Base: 0.04 calories per step + distance factor + time factor
         val stepCalories = steps * 0.04f
         val distanceCalories = (distanceMeters / 1000) * 50 // ~50 cal per km
