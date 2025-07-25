@@ -26,6 +26,10 @@ import coil.compose.rememberAsyncImagePainter
 import com.yourname.fitnesstracker.data.UserProfile
 import com.yourname.fitnesstracker.viewmodel.UserProfileViewModel
 
+/**
+ * Main profile screen displaying comprehensive user information and health metrics.
+ * Shows profile details, BMI, fitness assessment, recommendations, and action buttons.
+ */
 @Composable
 fun ProfileScreen(
     navController: NavController,
@@ -33,7 +37,7 @@ fun ProfileScreen(
 ) {
     val uiState by userProfileViewModel.uiState.collectAsState()
 
-    // If no profile exists, navigate to setup
+    // Navigate to setup if no profile exists
     LaunchedEffect(uiState.isFirstTimeUser) {
         if (uiState.isFirstTimeUser) {
             navController.navigate("profile_setup")
@@ -47,7 +51,7 @@ fun ProfileScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header
+        // Header with title and action buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -59,6 +63,7 @@ fun ProfileScreen(
                 fontWeight = FontWeight.Bold
             )
 
+            // Action buttons for assessment and edit
             Row {
                 IconButton(onClick = {
                     userProfileViewModel.calculateAndShowAssessment()
@@ -79,6 +84,7 @@ fun ProfileScreen(
             }
         }
 
+        // Loading state display
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxWidth(),
@@ -87,22 +93,23 @@ fun ProfileScreen(
                 CircularProgressIndicator()
             }
         } else {
+            // Main profile content (only if profile exists)
             uiState.profile?.let { profile ->
-                // Profile Header Card
+                // Profile header with image and basic info
                 ProfileHeaderCard(profile = profile, userProfileViewModel = userProfileViewModel)
 
-                // Health Metrics Card
+                // Health metrics including BMI and fitness level
                 HealthMetricsCard(profile = profile, userProfileViewModel = userProfileViewModel)
 
-                // Personal Details Card
+                // Personal details and account information
                 PersonalDetailsCard(profile = profile)
 
-                // Recommendations Card
+                // Personalized fitness recommendations
                 RecommendationsCard(
                     recommendations = userProfileViewModel.getPersonalizedRecommendations()
                 )
 
-                // Actions Card
+                // Action buttons for profile management
                 ActionsCard(
                     onEditProfile = { navController.navigate("profile_setup") },
                     onViewAssessment = { userProfileViewModel.calculateAndShowAssessment() },
@@ -111,7 +118,7 @@ fun ProfileScreen(
             }
         }
 
-        // Error handling
+        // Error message display with dismiss option
         uiState.error?.let { error ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -142,7 +149,7 @@ fun ProfileScreen(
         }
     }
 
-    // Fitness Assessment Dialog
+    // Fitness assessment dialog overlay
     if (uiState.showAssessment && uiState.fitnessAssessment != null) {
         FitnessAssessmentDialog(
             assessment = uiState.fitnessAssessment!!,
@@ -151,6 +158,9 @@ fun ProfileScreen(
     }
 }
 
+/**
+ * Card displaying profile header with image, name, age, and quick stats.
+ */
 @Composable
 fun ProfileHeaderCard(
     profile: UserProfile,
@@ -164,7 +174,7 @@ fun ProfileHeaderCard(
             modifier = Modifier.padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Profile Image
+            // Circular profile image or default icon
             Box(
                 modifier = Modifier
                     .size(100.dp)
@@ -191,7 +201,7 @@ fun ProfileHeaderCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Name and Basic Info
+            // User name and basic demographic info
             Text(
                 text = profile.name,
                 style = MaterialTheme.typography.headlineSmall,
@@ -206,7 +216,7 @@ fun ProfileHeaderCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Quick Stats Row
+            // Quick stats row showing key metrics
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -231,11 +241,15 @@ fun ProfileHeaderCard(
     }
 }
 
+/**
+ * Card displaying calculated health metrics including BMI, fitness level, and calorie targets.
+ */
 @Composable
 fun HealthMetricsCard(
     profile: UserProfile,
     userProfileViewModel: UserProfileViewModel
 ) {
+    // Calculate health metrics
     val bmi = profile.calculateBMI()
     val bmiCategory = profile.getBMICategory()
     val bmiColor = userProfileViewModel.getBMIColor(bmi)
@@ -253,7 +267,7 @@ fun HealthMetricsCard(
                 fontWeight = FontWeight.SemiBold
             )
 
-            // BMI Section
+            // BMI section with calculated value and category
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -286,7 +300,7 @@ fun HealthMetricsCard(
 
             Divider()
 
-            // Fitness Level Section
+            // Fitness level section with assessment score
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -319,7 +333,7 @@ fun HealthMetricsCard(
 
             Divider()
 
-            // Recommended Calories
+            // Daily calorie target recommendation
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -353,6 +367,9 @@ fun HealthMetricsCard(
     }
 }
 
+/**
+ * Card displaying personal details and account information.
+ */
 @Composable
 fun PersonalDetailsCard(profile: UserProfile) {
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -366,24 +383,28 @@ fun PersonalDetailsCard(profile: UserProfile) {
                 fontWeight = FontWeight.SemiBold
             )
 
+            // Activity level information
             DetailRow(
                 icon = Icons.Default.DirectionsRun,
                 label = "Activity Level",
                 value = profile.activityLevel
             )
 
+            // Fitness goal information
             DetailRow(
                 icon = Icons.Default.Flag,
                 label = "Fitness Goal",
                 value = profile.fitnessGoal
             )
 
+            // Account creation date
             DetailRow(
                 icon = Icons.Default.Today,
                 label = "Member Since",
                 value = profile.createdDate.split(" ").firstOrNull() ?: "Unknown"
             )
 
+            // Last update date (only if different from creation)
             if (profile.lastUpdated != profile.createdDate) {
                 DetailRow(
                     icon = Icons.Default.Update,
@@ -395,6 +416,9 @@ fun PersonalDetailsCard(profile: UserProfile) {
     }
 }
 
+/**
+ * Card displaying personalized fitness recommendations.
+ */
 @Composable
 fun RecommendationsCard(recommendations: List<String>) {
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -402,6 +426,7 @@ fun RecommendationsCard(recommendations: List<String>) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Header with lightbulb icon
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -418,6 +443,7 @@ fun RecommendationsCard(recommendations: List<String>) {
                 )
             }
 
+            // List of personalized recommendations
             recommendations.forEach { recommendation ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -441,6 +467,9 @@ fun RecommendationsCard(recommendations: List<String>) {
     }
 }
 
+/**
+ * Card containing action buttons for profile management.
+ */
 @Composable
 fun ActionsCard(
     onEditProfile: () -> Unit,
@@ -460,6 +489,7 @@ fun ActionsCard(
                 fontWeight = FontWeight.SemiBold
             )
 
+            // Edit profile button
             OutlinedButton(
                 onClick = onEditProfile,
                 modifier = Modifier.fillMaxWidth()
@@ -473,6 +503,7 @@ fun ActionsCard(
                 Text("Edit Profile")
             }
 
+            // View assessment button
             OutlinedButton(
                 onClick = onViewAssessment,
                 modifier = Modifier.fillMaxWidth()
@@ -486,6 +517,7 @@ fun ActionsCard(
                 Text("View Fitness Assessment")
             }
 
+            // Delete profile button (destructive action)
             OutlinedButton(
                 onClick = { showDeleteDialog = true },
                 modifier = Modifier.fillMaxWidth(),
@@ -504,7 +536,7 @@ fun ActionsCard(
         }
     }
 
-    // Delete Confirmation Dialog
+    // Delete confirmation dialog
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -529,6 +561,9 @@ fun ActionsCard(
     }
 }
 
+/**
+ * Quick statistic item with icon, value, and label for profile header.
+ */
 @Composable
 fun QuickStatItem(
     icon: ImageVector,
@@ -558,6 +593,9 @@ fun QuickStatItem(
     }
 }
 
+/**
+ * Detail row component displaying icon, label, and value for personal information.
+ */
 @Composable
 fun DetailRow(
     icon: ImageVector,

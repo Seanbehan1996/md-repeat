@@ -38,6 +38,10 @@ import com.yourname.fitnesstracker.viewmodel.ChartMetric
 import com.yourname.fitnesstracker.viewmodel.ChartPeriod
 import kotlin.math.max
 
+/**
+ * Main analytics dashboard screen displaying workout statistics, charts, and achievements.
+ * Shows comprehensive fitness data with interactive charts and progress tracking.
+ */
 @Composable
 fun AnalyticsDashboardScreen(
     navController: NavController,
@@ -45,6 +49,7 @@ fun AnalyticsDashboardScreen(
 ) {
     val uiState by analyticsViewModel.uiState.collectAsState()
 
+    // Refresh data when screen loads
     LaunchedEffect(Unit) {
         analyticsViewModel.refreshData()
     }
@@ -54,7 +59,7 @@ fun AnalyticsDashboardScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Header
+        // Header with title and refresh button
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -74,6 +79,7 @@ fun AnalyticsDashboardScreen(
             }
         }
 
+        // Show loading spinner while data loads
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -82,15 +88,16 @@ fun AnalyticsDashboardScreen(
                 CircularProgressIndicator()
             }
         } else {
+            // Main dashboard content in scrollable list
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Overview Stats Card
+                // Overview statistics card
                 item {
                     OverviewStatsCard(analytics = uiState.analytics)
                 }
 
-                // Achievement Progress Card
+                // Achievement progress summary
                 item {
                     AchievementProgressCard(
                         totalPoints = uiState.totalPoints,
@@ -100,7 +107,7 @@ fun AnalyticsDashboardScreen(
                     )
                 }
 
-                // Chart Card
+                // Interactive chart with metric and period selection
                 item {
                     ChartCard(
                         chartData = when (uiState.selectedMetric) {
@@ -115,7 +122,7 @@ fun AnalyticsDashboardScreen(
                     )
                 }
 
-                // Recent Achievements
+                // Recent achievements preview
                 item {
                     RecentAchievementsCard(
                         achievements = analyticsViewModel.getRecentAchievements(),
@@ -123,14 +130,14 @@ fun AnalyticsDashboardScreen(
                     )
                 }
 
-                // Personal Records Card
+                // Personal records and streaks
                 item {
                     PersonalRecordsCard(analytics = uiState.analytics)
                 }
             }
         }
 
-        // Error handling
+        // Error message display
         uiState.error?.let { error ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -162,6 +169,9 @@ fun AnalyticsDashboardScreen(
     }
 }
 
+/**
+ * Card displaying main workout statistics and averages.
+ */
 @Composable
 fun OverviewStatsCard(analytics: WorkoutAnalytics) {
     Card(
@@ -178,7 +188,7 @@ fun OverviewStatsCard(analytics: WorkoutAnalytics) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Main stats grid
+            // Main statistics displayed in a grid
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -211,7 +221,7 @@ fun OverviewStatsCard(analytics: WorkoutAnalytics) {
 
             Divider(modifier = Modifier.padding(vertical = 16.dp))
 
-            // Averages
+            // Average performance per workout
             Text(
                 text = "Average per Workout",
                 style = MaterialTheme.typography.titleMedium,
@@ -244,6 +254,9 @@ fun OverviewStatsCard(analytics: WorkoutAnalytics) {
     }
 }
 
+/**
+ * Card showing achievement progress with points and completion percentage.
+ */
 @Composable
 fun AchievementProgressCard(
     totalPoints: Int,
@@ -257,6 +270,7 @@ fun AchievementProgressCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            // Header with title and points badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -284,7 +298,7 @@ fun AchievementProgressCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Progress bar
+            // Progress bar with completion stats
             Column {
                 LinearProgressIndicator(
                     progress = progress,
@@ -314,6 +328,9 @@ fun AchievementProgressCard(
     }
 }
 
+/**
+ * Interactive chart card with metric and period selection filters.
+ */
 @Composable
 fun ChartCard(
     chartData: List<ChartDataPoint>,
@@ -335,7 +352,7 @@ fun ChartCard(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            // Metric selector
+            // Metric selector (Steps, Distance, etc.)
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -349,7 +366,7 @@ fun ChartCard(
                 }
             }
 
-            // Period selector
+            // Period selector (Week, Month, Year)
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -363,7 +380,7 @@ fun ChartCard(
                 }
             }
 
-            // Chart
+            // Chart display or empty state
             if (chartData.isNotEmpty()) {
                 SimpleLineChart(
                     data = chartData,
@@ -390,6 +407,9 @@ fun ChartCard(
     }
 }
 
+/**
+ * Custom line chart component with gradient fill and data points.
+ */
 @Composable
 fun SimpleLineChart(
     data: List<ChartDataPoint>,
@@ -399,6 +419,7 @@ fun SimpleLineChart(
     Canvas(modifier = modifier) {
         if (data.isEmpty()) return@Canvas
 
+        // Calculate chart bounds and scaling
         val maxValue = data.maxOfOrNull { it.value } ?: 1f
         val minValue = data.minOfOrNull { it.value } ?: 0f
         val range = maxValue - minValue
@@ -410,7 +431,7 @@ fun SimpleLineChart(
         val chartWidth = width - padding * 2
         val chartHeight = height - padding * 2
 
-        // Draw axes
+        // Draw chart axes
         drawLine(
             color = Color.Gray.copy(alpha = 0.3f),
             start = Offset(padding, height - padding),
@@ -425,11 +446,12 @@ fun SimpleLineChart(
             strokeWidth = 2.dp.toPx()
         )
 
-        // Draw data points and lines
+        // Create paths for line and gradient fill
         val path = Path()
         val gradientPath = Path()
 
         data.forEachIndexed { index, point ->
+            // Calculate point position
             val x = padding + (index.toFloat() / (data.size - 1).coerceAtLeast(1)) * chartWidth
             val y = height - padding - ((point.value - minValue) / range.coerceAtLeast(0.1f)) * chartHeight
 
@@ -442,7 +464,7 @@ fun SimpleLineChart(
                 gradientPath.lineTo(x, y)
             }
 
-            // Draw point
+            // Draw data point circles
             drawCircle(
                 color = color,
                 radius = 4.dp.toPx(),
@@ -450,11 +472,11 @@ fun SimpleLineChart(
             )
         }
 
-        // Close gradient path
+        // Close gradient path for fill
         gradientPath.lineTo(width - padding, height - padding)
         gradientPath.close()
 
-        // Draw gradient fill
+        // Draw gradient fill under the line
         drawPath(
             path = gradientPath,
             brush = Brush.verticalGradient(
@@ -465,7 +487,7 @@ fun SimpleLineChart(
             )
         )
 
-        // Draw line
+        // Draw the main line
         drawPath(
             path = path,
             color = color,
@@ -474,6 +496,9 @@ fun SimpleLineChart(
     }
 }
 
+/**
+ * Card displaying recent achievements with navigation to full list.
+ */
 @Composable
 fun RecentAchievementsCard(
     achievements: List<Achievement>,
@@ -485,6 +510,7 @@ fun RecentAchievementsCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            // Header with view all button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -501,6 +527,7 @@ fun RecentAchievementsCard(
                 }
             }
 
+            // Show empty state or list of recent achievements
             if (achievements.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -516,6 +543,7 @@ fun RecentAchievementsCard(
                     )
                 }
             } else {
+                // Show up to 3 recent achievements
                 achievements.take(3).forEach { achievement ->
                     AchievementListItem(achievement = achievement)
                 }
@@ -524,6 +552,9 @@ fun RecentAchievementsCard(
     }
 }
 
+/**
+ * Card displaying personal records and current streaks.
+ */
 @Composable
 fun PersonalRecordsCard(analytics: WorkoutAnalytics) {
     Card(
@@ -539,6 +570,7 @@ fun PersonalRecordsCard(analytics: WorkoutAnalytics) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
+            // List of personal records
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -567,6 +599,9 @@ fun PersonalRecordsCard(analytics: WorkoutAnalytics) {
     }
 }
 
+/**
+ * Individual statistic item with icon, value, and label.
+ */
 @Composable
 fun StatItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -599,6 +634,9 @@ fun StatItem(
     }
 }
 
+/**
+ * Simple average statistic display without icon.
+ */
 @Composable
 fun AverageStatItem(
     label: String,
@@ -621,6 +659,9 @@ fun AverageStatItem(
     }
 }
 
+/**
+ * Compact achievement list item for recent achievements display.
+ */
 @Composable
 fun AchievementListItem(achievement: Achievement) {
     Row(
@@ -629,7 +670,7 @@ fun AchievementListItem(achievement: Achievement) {
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Achievement Icon
+        // Achievement icon with circular background
         Box(
             modifier = Modifier
                 .size(48.dp)
@@ -654,7 +695,7 @@ fun AchievementListItem(achievement: Achievement) {
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // Achievement Details
+        // Achievement details
         Column(
             modifier = Modifier.weight(1f)
         ) {
@@ -670,7 +711,7 @@ fun AchievementListItem(achievement: Achievement) {
             )
         }
 
-        // Points
+        // Points badge
         Surface(
             shape = RoundedCornerShape(8.dp),
             color = MaterialTheme.colorScheme.tertiaryContainer
@@ -686,6 +727,9 @@ fun AchievementListItem(achievement: Achievement) {
     }
 }
 
+/**
+ * Personal record item with icon, label, and value.
+ */
 @Composable
 fun PersonalRecordItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -721,6 +765,9 @@ fun PersonalRecordItem(
     }
 }
 
+/**
+ * Helper function to get appropriate icon for achievement category.
+ */
 fun getAchievementIcon(category: String): androidx.compose.ui.graphics.vector.ImageVector {
     return when (category) {
         "steps" -> Icons.Default.DirectionsWalk

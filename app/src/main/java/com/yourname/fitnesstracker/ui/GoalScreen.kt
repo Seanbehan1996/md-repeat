@@ -17,6 +17,10 @@ import androidx.navigation.NavController
 import com.yourname.fitnesstracker.data.UserGoals
 import com.yourname.fitnesstracker.viewmodel.MainViewModel
 
+/**
+ * Screen for setting and managing user fitness goals.
+ * Allows users to set daily targets for steps, distance, and exercise duration.
+ */
 @Composable
 fun GoalScreen(
     mainViewModel: MainViewModel = viewModel(),
@@ -25,13 +29,14 @@ fun GoalScreen(
     val uiState by mainViewModel.uiState.collectAsState()
     val currentGoals = uiState.userGoals
 
+    // Local state for form inputs
     var stepsGoal by remember { mutableStateOf(currentGoals.steps.toString()) }
     var distanceGoal by remember { mutableStateOf(currentGoals.distance.toString()) }
     var durationGoal by remember { mutableStateOf((currentGoals.duration / 60).toString()) } // Convert to minutes for display
 
     var showSuccessMessage by remember { mutableStateOf(false) }
 
-    // Update local state when goals change
+    // Update local state when goals change from viewmodel
     LaunchedEffect(currentGoals) {
         stepsGoal = currentGoals.steps.toString()
         distanceGoal = currentGoals.distance.toString()
@@ -44,7 +49,7 @@ fun GoalScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Header
+        // Header with back button and title
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -62,7 +67,7 @@ fun GoalScreen(
             )
         }
 
-        // Current Goals Overview Card
+        // Current goals overview card showing saved values
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(4.dp)
@@ -77,6 +82,7 @@ fun GoalScreen(
                     fontWeight = FontWeight.SemiBold
                 )
 
+                // Display current goals in a row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -100,7 +106,7 @@ fun GoalScreen(
             }
         }
 
-        // Goal Input Section
+        // Goal input section with text fields
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -114,7 +120,7 @@ fun GoalScreen(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                // Steps Goal
+                // Steps goal input
                 GoalInputField(
                     value = stepsGoal,
                     onValueChange = { stepsGoal = it },
@@ -124,7 +130,7 @@ fun GoalScreen(
                     keyboardType = KeyboardType.Number
                 )
 
-                // Distance Goal
+                // Distance goal input
                 GoalInputField(
                     value = distanceGoal,
                     onValueChange = { distanceGoal = it },
@@ -134,7 +140,7 @@ fun GoalScreen(
                     keyboardType = KeyboardType.Decimal
                 )
 
-                // Duration Goal
+                // Duration goal input
                 GoalInputField(
                     value = durationGoal,
                     onValueChange = { durationGoal = it },
@@ -146,7 +152,7 @@ fun GoalScreen(
             }
         }
 
-        // Preset Goals Card
+        // Preset goals card with quick selection buttons
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -166,6 +172,7 @@ fun GoalScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
+                // Three preset buttons for different fitness levels
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -203,11 +210,12 @@ fun GoalScreen(
             }
         }
 
-        // Action Buttons
+        // Action buttons for reset and save
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Reset button to restore current saved values
             OutlinedButton(
                 onClick = {
                     // Reset to current saved goals
@@ -226,6 +234,7 @@ fun GoalScreen(
                 Text("Reset")
             }
 
+            // Save button with validation
             Button(
                 onClick = {
                     // Validate and save goals
@@ -258,7 +267,7 @@ fun GoalScreen(
             }
         }
 
-        // Success Message
+        // Success message that auto-dismisses after 2 seconds
         if (showSuccessMessage) {
             LaunchedEffect(Unit) {
                 kotlinx.coroutines.delay(2000)
@@ -289,7 +298,7 @@ fun GoalScreen(
             }
         }
 
-        // Error handling
+        // Error message display with dismiss button
         uiState.error?.let { error ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -321,6 +330,9 @@ fun GoalScreen(
     }
 }
 
+/**
+ * Individual goal summary item displaying icon, value, and label.
+ */
 @Composable
 fun GoalSummaryItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -350,6 +362,9 @@ fun GoalSummaryItem(
     }
 }
 
+/**
+ * Reusable input field for goal values with icon and suffix.
+ */
 @Composable
 fun GoalInputField(
     value: String,
@@ -377,6 +392,9 @@ fun GoalInputField(
     )
 }
 
+/**
+ * Preset button for quick goal selection based on fitness level.
+ */
 @Composable
 fun PresetButton(
     text: String,

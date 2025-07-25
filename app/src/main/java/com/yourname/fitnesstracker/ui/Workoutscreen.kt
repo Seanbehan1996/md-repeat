@@ -1,6 +1,6 @@
 package com.yourname.fitnesstracker.ui
 
-import com.yourname.fitnesstracker.utils.formatDuration
+//import com.yourname.fitnesstracker.utils.formatDuration
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -23,10 +23,15 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.yourname.fitnesstracker.sensors.LocationTracker
-import com.yourname.fitnesstracker.sensors.StepCounter
+import com.yourname.fitnesstracker.sensors.ConditionalStepCounter
 import com.yourname.fitnesstracker.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
+import androidx.compose.ui.unit.sp
 
+/**
+ * Main workout tracking screen with real-time sensor monitoring.
+ * Handles permissions, tracks steps/location, displays progress, and manages workout sessions.
+ */
 @Composable
 fun WorkoutScreen(
     mainViewModel: MainViewModel = viewModel(),
@@ -36,17 +41,22 @@ fun WorkoutScreen(
     val uiState by mainViewModel.uiState.collectAsState()
     val workoutState by mainViewModel.workoutState.collectAsState()
 
-    // Initialize sensors
-    val stepCounter = remember { StepCounter(context) }
+    // Initialize sensor trackers
+    val stepCounter = remember { ConditionalStepCounter(context) }
     val locationTracker = remember { LocationTracker(context) }
 
+    // Location tracking state for distance calculation
     var lastLocation by remember { mutableStateOf<Location?>(null) }
     var totalDistance by remember { mutableStateOf(0f) }
 
+    // Permission management state
     var permissionsGranted by remember { mutableStateOf(false) }
     var showPermissionRationale by remember { mutableStateOf(false) }
 
-    // Check permissions
+    // ADDED: State for sensor availability
+    var sensorAvailable by remember { mutableStateOf(true) }
+
+    // Define required permissions based on Android version
     val requiredPermissions = buildList {
         add(Manifest.permission.ACCESS_FINE_LOCATION)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -54,6 +64,7 @@ fun WorkoutScreen(
         }
     }
 
+    // Permission request launcher
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -63,8 +74,10 @@ fun WorkoutScreen(
         }
     }
 
-    // Check permissions on composition
+    // ADDED: Check sensor availability when screen loads
     LaunchedEffect(Unit) {
+        sensorAvailable = stepCounter.isAccelerometerAvailable()
+
         val missingPermissions = requiredPermissions.filter {
             ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
         }
@@ -76,15 +89,15 @@ fun WorkoutScreen(
         }
     }
 
-    // Handle sensor tracking
+    // Manage sensor tracking based on workout state
     LaunchedEffect(workoutState.isTracking) {
-        if (workoutState.isTracking && permissionsGranted) {
-            // Start step tracking
+        if (workoutState.isTracking && permissionsGranted && sensorAvailable) {
+            // CHANGED: Start step counting with accelerometer
             stepCounter.startTracking { steps ->
                 mainViewModel.updateWorkoutSteps(steps)
             }
 
-            // Start location tracking
+            // Start location tracking for distance calculation
             locationTracker.startTracking { location ->
                 lastLocation?.let { lastLoc ->
                     val distance = lastLoc.distanceTo(location)
@@ -94,7 +107,7 @@ fun WorkoutScreen(
                 lastLocation = location
             }
         } else {
-            // Stop tracking
+            // Stop all tracking and reset state
             stepCounter.stopTracking()
             locationTracker.stopTracking()
             lastLocation = null
@@ -102,7 +115,7 @@ fun WorkoutScreen(
         }
     }
 
-    // Update workout duration every second
+    // Update workout duration every second during tracking
     LaunchedEffect(workoutState.isTracking) {
         while (workoutState.isTracking) {
             delay(1000)
@@ -110,7 +123,7 @@ fun WorkoutScreen(
         }
     }
 
-    // Cleanup on disposal
+    // Cleanup sensors when screen is disposed
     DisposableEffect(Unit) {
         onDispose {
             stepCounter.stopTracking()
@@ -118,6 +131,7 @@ fun WorkoutScreen(
         }
     }
 
+    // Show permission rationale dialog if needed
     if (showPermissionRationale) {
         PermissionRationaleDialog(
             onDismiss = { showPermissionRationale = false },
@@ -134,13 +148,40 @@ fun WorkoutScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Header
+        // Screen header
         Text(
             text = "Workout Tracking",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
 
+        // ADDED: Show sensor availability error if needed
+        if (!sensorAvailable) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Accelerometer not available on this device. Step counting will not work.",
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+        }
+
+        // Show permission request or workout content
         if (!permissionsGranted) {
             PermissionRequiredCard(
                 onRequestPermissions = {
@@ -148,7 +189,7 @@ fun WorkoutScreen(
                 }
             )
         } else {
-            // Workout Status Card
+            // Main workout status display
             WorkoutStatusCard(
                 isTracking = workoutState.isTracking,
                 steps = workoutState.steps,
@@ -157,17 +198,18 @@ fun WorkoutScreen(
                 calories = workoutState.caloriesBurned
             )
 
-            // Goal Progress
+            // Goal progress indicators
             GoalProgressCard(
                 progress = mainViewModel.getGoalProgress(),
                 goals = uiState.userGoals
             )
 
-            // Control Buttons
+            // Control buttons for workout management
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Start/Stop workout button - CHANGED: Disable if no accelerometer
                 Button(
                     onClick = {
                         if (workoutState.isTracking) {
@@ -177,6 +219,7 @@ fun WorkoutScreen(
                         }
                     },
                     modifier = Modifier.weight(1f),
+                    enabled = sensorAvailable, // ADDED: Only enable if sensor available
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (workoutState.isTracking)
                             MaterialTheme.colorScheme.error else
@@ -192,6 +235,7 @@ fun WorkoutScreen(
                     Text(if (workoutState.isTracking) "Stop" else "Start")
                 }
 
+                // History navigation button (disabled during tracking)
                 OutlinedButton(
                     onClick = { navController.navigate("history") },
                     modifier = Modifier.weight(1f),
@@ -208,7 +252,7 @@ fun WorkoutScreen(
             }
         }
 
-        // Error handling
+        // Error message display with dismiss option
         uiState.error?.let { error ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -240,6 +284,7 @@ fun WorkoutScreen(
     }
 }
 
+// Rest of the composables remain the same...
 @Composable
 fun WorkoutStatusCard(
     isTracking: Boolean,

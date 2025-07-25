@@ -1,4 +1,3 @@
-
 package com.yourname.fitnesstracker.ui
 
 import androidx.compose.foundation.background
@@ -25,6 +24,10 @@ import androidx.navigation.NavController
 import com.yourname.fitnesstracker.data.Achievement
 import com.yourname.fitnesstracker.viewmodel.AnalyticsViewModel
 
+/**
+ * Main achievements screen that displays user progress and achievement cards.
+ * Shows filtered achievements by category with progress statistics.
+ */
 @Composable
 fun AchievementsScreen(
     navController: NavController,
@@ -33,9 +36,11 @@ fun AchievementsScreen(
     val uiState by analyticsViewModel.uiState.collectAsState()
     var selectedCategory by remember { mutableStateOf("All") }
 
+    // Available filter categories
     val categories = listOf("All", "Steps", "Distance", "Duration", "Workouts", "Streak", "Special")
     val achievementsByCategory = analyticsViewModel.getAchievementsByCategory()
 
+    // Filter achievements based on selected category
     val filteredAchievements = if (selectedCategory == "All") {
         uiState.achievements
     } else {
@@ -47,7 +52,7 @@ fun AchievementsScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Header
+        // Header with back button and title
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -68,7 +73,7 @@ fun AchievementsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Progress Summary Card
+        // Progress summary card showing overall achievement stats
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(8.dp)
@@ -85,6 +90,7 @@ fun AchievementsScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Three main statistics displayed horizontally
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -111,6 +117,7 @@ fun AchievementsScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Progress bar showing completion percentage
                 LinearProgressIndicator(
                     progress = analyticsViewModel.getAchievementProgress(),
                     modifier = Modifier.fillMaxWidth(),
@@ -120,6 +127,7 @@ fun AchievementsScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Progress text summary
                 Text(
                     text = "${uiState.unlockedCount} of ${uiState.totalAchievementCount} achievements unlocked",
                     style = MaterialTheme.typography.bodyMedium,
@@ -130,7 +138,7 @@ fun AchievementsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Category Filter
+        // Horizontal scrollable category filter chips
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(bottom = 16.dp)
@@ -144,14 +152,15 @@ fun AchievementsScreen(
             }
         }
 
-        // Achievements List
+        // Main achievements list
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Separate unlocked and locked achievements
             val unlockedAchievements = filteredAchievements.filter { it.isUnlocked }
             val lockedAchievements = filteredAchievements.filter { !it.isUnlocked }
 
-            // Unlocked achievements first
+            // Show unlocked achievements first
             if (unlockedAchievements.isNotEmpty()) {
                 item {
                     Text(
@@ -168,7 +177,7 @@ fun AchievementsScreen(
                 }
             }
 
-            // Locked achievements
+            // Show locked achievements second
             if (lockedAchievements.isNotEmpty()) {
                 item {
                     Text(
@@ -185,7 +194,7 @@ fun AchievementsScreen(
                 }
             }
 
-            // Empty state
+            // Empty state when no achievements in selected category
             if (filteredAchievements.isEmpty()) {
                 item {
                     Box(
@@ -218,6 +227,9 @@ fun AchievementsScreen(
     }
 }
 
+/**
+ * Displays a single achievement statistic with icon, value, and label.
+ */
 @Composable
 fun AchievementStat(
     value: String,
@@ -250,11 +262,20 @@ fun AchievementStat(
     }
 }
 
+/**
+ * Individual achievement card showing icon, details, points, and progress.
+ * Displays differently based on unlock status.
+ */
 @Composable
 fun AchievementCard(
     achievement: Achievement,
-    isUnlocked: Boolean
+    isUnlocked: Boolean,
+    analyticsViewModel: AnalyticsViewModel = viewModel()
 ) {
+    // Get current progress for this achievement
+    val progress = analyticsViewModel.getAchievementProgress(achievement)
+    val progressPercentage = (progress.clampedProgress * 100).toInt()
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -268,122 +289,196 @@ fun AchievementCard(
             defaultElevation = if (isUnlocked) 4.dp else 2.dp
         )
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            // Achievement Icon
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(
-                        brush = if (isUnlocked) {
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Circular achievement icon with gradient background
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                        .background(
+                            brush = if (isUnlocked) {
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                    )
                                 )
-                            )
-                        } else {
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                            } else {
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                                    )
                                 )
-                            )
-                        }
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = if (isUnlocked) {
-                        getAchievementIcon(achievement.category)
-                    } else {
-                        Icons.Default.Lock
-                    },
-                    contentDescription = null,
-                    tint = if (isUnlocked) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    },
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Achievement Details
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = achievement.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isUnlocked) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    }
-                )
-
-                Text(
-                    text = achievement.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (isUnlocked) {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    },
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-
-                if (isUnlocked && achievement.achievedDate != null) {
-                    Text(
-                        text = "Unlocked: ${achievement.achievedDate.split(" ")[0]}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-            }
-
-            // Points Badge
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = if (isUnlocked) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                }
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Star,
+                        imageVector = if (isUnlocked) {
+                            getAchievementIcon(achievement.category)
+                        } else {
+                            Icons.Default.Lock
+                        },
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
                         tint = if (isUnlocked) {
-                            MaterialTheme.colorScheme.onPrimary
+                            MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        }
+                        },
+                        modifier = Modifier.size(32.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Achievement title, description, and unlock date
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
-                        text = "${achievement.points}",
-                        style = MaterialTheme.typography.labelLarge,
+                        text = achievement.title,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = if (isUnlocked) {
-                            MaterialTheme.colorScheme.onPrimary
+                            MaterialTheme.colorScheme.onSurface
                         } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         }
                     )
+
+                    Text(
+                        text = achievement.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (isUnlocked) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        },
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+
+                    // Show unlock date for completed achievements
+                    if (isUnlocked && achievement.achievedDate != null) {
+                        Text(
+                            text = "Unlocked: ${achievement.achievedDate.split(" ")[0]}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+
+                // Points badge on the right side
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isUnlocked) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                    }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = if (isUnlocked) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${achievement.points}",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isUnlocked) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Progress section (only show for locked achievements or recently unlocked ones)
+            if (!isUnlocked || progressPercentage < 100) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Progress text and percentage
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = progress.progressText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isUnlocked) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+
+                    Text(
+                        text = "$progressPercentage%",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isUnlocked) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Progress bar
+                LinearProgressIndicator(
+                    progress = progress.clampedProgress,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = when {
+                        isUnlocked -> MaterialTheme.colorScheme.primary
+                        progressPercentage >= 80 -> MaterialTheme.colorScheme.tertiary
+                        progressPercentage >= 50 -> MaterialTheme.colorScheme.secondary
+                        else -> MaterialTheme.colorScheme.outline
+                    },
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+
+                // Show encouraging message for high progress
+                if (!isUnlocked && progressPercentage >= 80) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.TrendingUp,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Almost there!",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
         }

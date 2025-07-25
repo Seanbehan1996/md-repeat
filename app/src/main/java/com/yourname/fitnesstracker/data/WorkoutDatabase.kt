@@ -63,9 +63,6 @@ abstract class WorkoutDatabase : RoomDatabase() {
             )
         """.trimIndent())
 
-                // Optional: copy old data (if you had previous structure)
-                // database.execSQL("INSERT INTO achievements_new (...) SELECT ... FROM achievements")
-
                 // If an old 'achievements' table exists, drop it
                 database.execSQL("DROP TABLE IF EXISTS achievements")
 

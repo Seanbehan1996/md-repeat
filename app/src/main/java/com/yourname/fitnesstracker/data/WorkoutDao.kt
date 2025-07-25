@@ -15,4 +15,5 @@ interface WorkoutDao {
 
     @Query("SELECT * FROM workouts ORDER BY date DESC")
     fun getAllWorkoutsFlow(): Flow<List<WorkoutSession>>
+
 }

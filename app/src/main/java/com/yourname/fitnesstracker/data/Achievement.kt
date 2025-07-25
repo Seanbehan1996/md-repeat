@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Index
 
+//CREATE THE ACHIEVEMENT OBJECTS
 @Entity(
     tableName = "achievements",
     indices = [Index(value = ["achievementId"], unique = true)]

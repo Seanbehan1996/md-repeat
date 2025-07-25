@@ -10,6 +10,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 
+//GET LOCATION
 class LocationTracker(context: Context) {
 
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -19,7 +20,7 @@ class LocationTracker(context: Context) {
     private var isTracking = false
 
     private var onLocationUpdate: ((Location) -> Unit)? = null
-
+    //ENABLE PERMISSIONS
     @SuppressLint("MissingPermission")
     fun startTracking(onLocationUpdate: (Location) -> Unit) {
         if (isTracking) return

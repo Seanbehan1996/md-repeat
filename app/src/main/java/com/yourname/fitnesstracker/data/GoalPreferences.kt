@@ -10,7 +10,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 
-
+//CREATE USER GOALS
 private val Context.dataStore by preferencesDataStore(name = "user_goals")
 
 class GoalPreferences(private val context: Context) {

@@ -19,6 +19,11 @@ import androidx.navigation.NavController
 import com.yourname.fitnesstracker.data.UserProfile
 import com.yourname.fitnesstracker.viewmodel.UserProfileViewModel
 
+/**
+ * Profile setup screen for creating or editing user profiles.
+ * Collects personal information, physical measurements, and fitness preferences.
+ * Includes real-time BMI calculation and fitness assessment for new users.
+ */
 @Composable
 fun ProfileSetupScreen(
     navController: NavController,
@@ -26,7 +31,7 @@ fun ProfileSetupScreen(
 ) {
     val uiState by userProfileViewModel.uiState.collectAsState()
 
-    // Form state
+    // Form state variables for user input
     var name by remember { mutableStateOf(uiState.profile?.name ?: "") }
     var age by remember { mutableStateOf(uiState.profile?.age?.toString() ?: "") }
     var weight by remember { mutableStateOf(uiState.profile?.weight?.toString() ?: "") }
@@ -35,7 +40,7 @@ fun ProfileSetupScreen(
     var activityLevel by remember { mutableStateOf(uiState.profile?.activityLevel ?: "Moderate") }
     var fitnessGoal by remember { mutableStateOf(uiState.profile?.fitnessGoal ?: "General Fitness") }
 
-    // Update form when profile loads
+    // Update form fields when existing profile loads
     LaunchedEffect(uiState.profile) {
         uiState.profile?.let { profile ->
             name = profile.name
@@ -48,6 +53,7 @@ fun ProfileSetupScreen(
         }
     }
 
+    // Available options for selection chips
     val genderOptions = listOf("Male", "Female", "Other", "Not specified")
     val activityOptions = listOf("Sedentary", "Light", "Moderate", "Active", "Very Active")
     val fitnessGoalOptions = listOf("Weight Loss", "Muscle Gain", "Endurance", "General Fitness")
@@ -59,7 +65,7 @@ fun ProfileSetupScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header
+        // Header with context-sensitive title
         Text(
             text = if (uiState.isFirstTimeUser) "Welcome! Let's set up your profile" else "Edit Profile",
             style = MaterialTheme.typography.headlineMedium,
@@ -67,7 +73,7 @@ fun ProfileSetupScreen(
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
-        // Basic Information
+        // Basic information card with name, age, and gender
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -79,6 +85,7 @@ fun ProfileSetupScreen(
                     fontWeight = FontWeight.SemiBold
                 )
 
+                // Name input field
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -88,6 +95,7 @@ fun ProfileSetupScreen(
                     singleLine = true
                 )
 
+                // Age input field with numeric validation
                 OutlinedTextField(
                     value = age,
                     onValueChange = { if (it.all { char -> char.isDigit() }) age = it },
@@ -98,7 +106,7 @@ fun ProfileSetupScreen(
                     singleLine = true
                 )
 
-                // Gender Selection - Simple approach
+                // Gender selection using filter chips
                 Text(
                     text = "Gender",
                     style = MaterialTheme.typography.bodyMedium,
@@ -120,7 +128,7 @@ fun ProfileSetupScreen(
             }
         }
 
-        // Physical Measurements
+        // Physical measurements card with BMI calculation
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -132,6 +140,7 @@ fun ProfileSetupScreen(
                     fontWeight = FontWeight.SemiBold
                 )
 
+                // Weight and height input fields side by side
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -157,7 +166,7 @@ fun ProfileSetupScreen(
                     )
                 }
 
-                // BMI Preview
+                // Real-time BMI calculation and display
                 if (weight.isNotEmpty() && height.isNotEmpty()) {
                     val weightFloat = weight.toFloatOrNull()
                     val heightFloat = height.toFloatOrNull()
@@ -170,6 +179,7 @@ fun ProfileSetupScreen(
                             else -> "Obese"
                         }
 
+                        // BMI preview card
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
@@ -198,7 +208,7 @@ fun ProfileSetupScreen(
             }
         }
 
-        // Activity Level & Goals
+        // Activity level and fitness goals card
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -210,7 +220,7 @@ fun ProfileSetupScreen(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                // Activity Level Selection
+                // Activity level selection chips
                 Text(
                     text = "Activity Level",
                     style = MaterialTheme.typography.bodyMedium,
@@ -230,7 +240,7 @@ fun ProfileSetupScreen(
                     }
                 }
 
-                // Fitness Goal Selection
+                // Fitness goal selection chips
                 Text(
                     text = "Primary Fitness Goal",
                     style = MaterialTheme.typography.bodyMedium,
@@ -252,9 +262,10 @@ fun ProfileSetupScreen(
             }
         }
 
-        // Save Button
+        // Save button with validation and loading state
         Button(
             onClick = {
+                // Validate required fields before saving
                 if (name.isNotEmpty() && age.isNotEmpty() && weight.isNotEmpty() && height.isNotEmpty()) {
                     val profile = UserProfile(
                         name = name,
@@ -267,11 +278,12 @@ fun ProfileSetupScreen(
                     )
                     userProfileViewModel.createOrUpdateProfile(profile)
 
-                    // Navigate back or to assessment
+                    // Handle navigation based on user type
                     if (uiState.isFirstTimeUser) {
-                        // Show fitness assessment
+                        // Show fitness assessment for new users
                         userProfileViewModel.calculateAndShowAssessment()
                     } else {
+                        // Return to previous screen for existing users
                         navController.popBackStack()
                     }
                 }
@@ -295,7 +307,7 @@ fun ProfileSetupScreen(
             }
         }
 
-        // Skip button for first-time users
+        // Skip option for first-time users
         if (uiState.isFirstTimeUser) {
             TextButton(
                 onClick = { navController.navigate("home") },
@@ -306,7 +318,7 @@ fun ProfileSetupScreen(
         }
     }
 
-    // Error handling
+    // Error message display with dismiss option
     uiState.error?.let { error ->
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -336,7 +348,7 @@ fun ProfileSetupScreen(
         }
     }
 
-    // Fitness Assessment Dialog
+    // Fitness assessment dialog for new users
     if (uiState.showAssessment && uiState.fitnessAssessment != null) {
         FitnessAssessmentDialog(
             assessment = uiState.fitnessAssessment!!,
@@ -350,6 +362,10 @@ fun ProfileSetupScreen(
     }
 }
 
+/**
+ * Dialog displaying fitness assessment results for new users.
+ * Shows calculated fitness level, score, and personalized recommendations.
+ */
 @Composable
 fun FitnessAssessmentDialog(
     assessment: com.yourname.fitnesstracker.data.FitnessAssessment,
@@ -358,6 +374,7 @@ fun FitnessAssessmentDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
+            // Dialog header with assessment icon
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -374,7 +391,7 @@ fun FitnessAssessmentDialog(
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Overall Score
+                // Overall fitness score card
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -403,7 +420,7 @@ fun FitnessAssessmentDialog(
                     }
                 }
 
-                // Recommendations
+                // Top personalized recommendations
                 if (assessment.recommendations.isNotEmpty()) {
                     Text(
                         text = "Top Recommendations:",
@@ -411,6 +428,7 @@ fun FitnessAssessmentDialog(
                         fontWeight = FontWeight.SemiBold
                     )
 
+                    // Show first 3 recommendations as bullet points
                     assessment.recommendations.take(3).forEach { recommendation ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),

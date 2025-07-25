@@ -13,6 +13,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.yourname.fitnesstracker.viewmodel.UserProfileViewModel
 
+/**
+ * Main home screen of the fitness tracker app.
+ * Displays personalized welcome message, daily goals, action buttons, and helpful tips.
+ */
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -26,13 +30,14 @@ fun HomeScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Header with Profile Button
+        // Header section with personalized welcome and profile button
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
+                // Personalized welcome message or generic title
                 Text(
                     text = if (profileUiState.profile != null)
                         "Welcome back, ${profileUiState.profile!!.name.split(" ").first()}!"
@@ -40,6 +45,7 @@ fun HomeScreen(
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
+                // Motivational subtitle for existing users
                 if (profileUiState.profile != null) {
                     Text(
                         text = "Ready for your next workout?",
@@ -49,6 +55,7 @@ fun HomeScreen(
                 }
             }
 
+            // Profile button that navigates to setup or existing profile
             IconButton(
                 onClick = {
                     if (profileUiState.isFirstTimeUser) {
@@ -66,7 +73,7 @@ fun HomeScreen(
             }
         }
 
-        // Quick Stats Card (if profile exists)
+        // Daily goals card (only shown if user has profile)
         profileUiState.profile?.let { profile ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -82,6 +89,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.SemiBold
                     )
 
+                    // Row of personalized daily targets
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
@@ -109,12 +117,12 @@ fun HomeScreen(
             }
         }
 
-        // Main Action Buttons
+        // Main navigation action buttons
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Start Workout Button
+            // Primary start workout button
             Button(
                 onClick = { navController.navigate("workout") },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -134,7 +142,7 @@ fun HomeScreen(
                 )
             }
 
-            // Secondary Action Buttons
+            // Secondary navigation buttons row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -167,7 +175,7 @@ fun HomeScreen(
             }
         }
 
-        // Profile Setup Prompt (for first-time users)
+        // Profile setup prompt for first-time users
         if (profileUiState.isFirstTimeUser) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -179,6 +187,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Header with icon and title
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -195,12 +204,14 @@ fun HomeScreen(
                         )
                     }
 
+                    // Description of profile benefits
                     Text(
                         text = "Set up your profile to get personalized workout recommendations and fitness assessments.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
 
+                    // Call-to-action button
                     Button(
                         onClick = { navController.navigate("profile_setup") },
                         modifier = Modifier.fillMaxWidth()
@@ -211,7 +222,7 @@ fun HomeScreen(
             }
         }
 
-        // Quick Tips Card
+        // Daily fitness tip card
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -219,6 +230,7 @@ fun HomeScreen(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Header with lightbulb icon
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -235,6 +247,7 @@ fun HomeScreen(
                     )
                 }
 
+                // Random fitness tip selection
                 val tip = remember {
                     listOf(
                         "Start with a 5-minute warm-up before intense exercise",
@@ -255,6 +268,10 @@ fun HomeScreen(
     }
 }
 
+/**
+ * Individual goal item displaying icon, target value, and label.
+ * Used in the daily goals card to show personalized targets.
+ */
 @Composable
 fun QuickGoalItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
