@@ -18,7 +18,7 @@ data class WorkoutAnalytics(
 )
 
 data class WeeklyProgress(
-    val weekStart: String, // "2025-07-21"
+    val weekStart: String,
     val weekEnd: String,
     val totalSteps: Int,
     val totalDistance: Float, // in km
@@ -100,7 +100,7 @@ object AchievementDefinitions {
             description = "Walk 1 kilometer in a single workout",
             iconName = "distance_bronze",
             category = "distance",
-            targetValue = 1000,
+            targetValue = 1,
             points = 15,
             achievedDate = null,
             isUnlocked = false
@@ -111,7 +111,7 @@ object AchievementDefinitions {
             description = "Walk 5 kilometers in a single workout",
             iconName = "distance_silver",
             category = "distance",
-            targetValue = 5000,
+            targetValue = 5,
             points = 30,
             achievedDate = null,
             isUnlocked = false
@@ -122,7 +122,7 @@ object AchievementDefinitions {
             description = "Walk 10 kilometers in a single workout",
             iconName = "distance_gold",
             category = "distance",
-            targetValue = 10000,
+            targetValue = 10,
             points = 60,
             achievedDate = null,
             isUnlocked = false

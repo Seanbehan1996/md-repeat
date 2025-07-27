@@ -82,7 +82,7 @@ class AnalyticsRepository(
     }
 
     private suspend fun checkDistanceAchievements(distanceMeters: Float, date: String) {
-        val distanceMilestones = mapOf(1000f to "distance_1km", 5000f to "distance_5km", 10000f to "distance_10km")
+        val distanceMilestones = mapOf(1f to "distance_1km", 5f to "distance_5km", 10f to "distance_10km")
 
         distanceMilestones.forEach { (target, achievementId) ->
             if (distanceMeters >= target) {

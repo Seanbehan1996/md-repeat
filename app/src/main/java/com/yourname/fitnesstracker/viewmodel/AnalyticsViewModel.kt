@@ -245,7 +245,7 @@ class AnalyticsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    // NEW METHOD: Get current user statistics for progress calculation
+    //Get current user statistics for progress calculation
     private fun getCurrentUserStats(): UserStats {
         val workouts = _uiState.value.workouts
         val totalSteps = workouts.sumOf { it.steps }
@@ -269,7 +269,7 @@ class AnalyticsViewModel(application: Application) : AndroidViewModel(applicatio
         )
     }
 
-    // NEW METHOD: Calculate current workout streak
+    //Calculate current workout streak
     private fun calculateCurrentStreak(workouts: List<WorkoutSession>): Int {
         if (workouts.isEmpty()) return 0
 
@@ -305,7 +305,7 @@ class AnalyticsViewModel(application: Application) : AndroidViewModel(applicatio
         return streak
     }
 
-    // NEW METHOD: Calculate early morning workouts
+    //Calculate early morning workouts
     private fun calculateEarlyWorkouts(workouts: List<WorkoutSession>): Int {
         return workouts.count { workout ->
             try {
@@ -318,7 +318,7 @@ class AnalyticsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    // NEW METHOD: Calculate weekend workouts
+    //Calculate weekend workouts
     private fun calculateWeekendWorkouts(workouts: List<WorkoutSession>): Int {
         return workouts.count { workout ->
             try {

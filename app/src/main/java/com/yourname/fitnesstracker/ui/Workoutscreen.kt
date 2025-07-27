@@ -1,6 +1,5 @@
 package com.yourname.fitnesstracker.ui
 
-//import com.yourname.fitnesstracker.utils.formatDuration
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -53,7 +52,6 @@ fun WorkoutScreen(
     var permissionsGranted by remember { mutableStateOf(false) }
     var showPermissionRationale by remember { mutableStateOf(false) }
 
-    // ADDED: State for sensor availability
     var sensorAvailable by remember { mutableStateOf(true) }
 
     // Define required permissions based on Android version
@@ -74,7 +72,7 @@ fun WorkoutScreen(
         }
     }
 
-    // ADDED: Check sensor availability when screen loads
+    //Check sensor availability when screen loads
     LaunchedEffect(Unit) {
         sensorAvailable = stepCounter.isAccelerometerAvailable()
 
@@ -155,7 +153,7 @@ fun WorkoutScreen(
             fontWeight = FontWeight.Bold
         )
 
-        // ADDED: Show sensor availability error if needed
+        //Show sensor availability error if needed
         if (!sensorAvailable) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -209,7 +207,7 @@ fun WorkoutScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Start/Stop workout button - CHANGED: Disable if no accelerometer
+                // Start/Stop workout button -Disable if no accelerometer
                 Button(
                     onClick = {
                         if (workoutState.isTracking) {
@@ -219,7 +217,7 @@ fun WorkoutScreen(
                         }
                     },
                     modifier = Modifier.weight(1f),
-                    enabled = sensorAvailable, // ADDED: Only enable if sensor available
+                    enabled = sensorAvailable, //Only enable if sensor available
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (workoutState.isTracking)
                             MaterialTheme.colorScheme.error else
@@ -284,7 +282,6 @@ fun WorkoutScreen(
     }
 }
 
-// Rest of the composables remain the same...
 @Composable
 fun WorkoutStatusCard(
     isTracking: Boolean,

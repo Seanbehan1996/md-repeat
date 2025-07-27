@@ -1,6 +1,7 @@
 package com.yourname.fitnesstracker.nav
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -18,24 +19,44 @@ import com.yourname.fitnesstracker.viewmodel.UserProfileViewModel
 import com.yourname.fitnesstracker.viewmodel.AnalyticsViewModel
 
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     val mainViewModel: MainViewModel = viewModel()
     val userProfileViewModel: UserProfileViewModel = viewModel()
 
-    NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomeScreen(navController, userProfileViewModel) }
-        composable("workout") { WorkoutScreen(mainViewModel, navController) }
-        composable("history") { HistoryScreen(mainViewModel, navController) }
-        composable("goals") { GoalScreen(mainViewModel, navController) }
-        composable("profile") { ProfileScreen(navController, userProfileViewModel) }
-        composable("profile_setup") { ProfileSetupScreen(navController, userProfileViewModel) }
+    NavHost(
+        navController = navController,
+        startDestination = "home",
+        modifier = modifier
+    ) {
+        // Main bottom navigation screens
+        composable("home") {
+            HomeScreen(navController, userProfileViewModel)
+        }
+        composable("workout") {
+            WorkoutScreen(mainViewModel, navController)
+        }
         composable("analytics") {
-            // Create analytics viewmodel only when needed
             val analyticsViewModel: AnalyticsViewModel = viewModel()
             AnalyticsDashboardScreen(navController, analyticsViewModel)
         }
+        composable("goals") {
+            GoalScreen(mainViewModel, navController)
+        }
+        composable("profile") {
+            ProfileScreen(navController, userProfileViewModel)
+        }
+
+        // Secondary screens (not in bottom nav)
+        composable("history") {
+            HistoryScreen(mainViewModel, navController)
+        }
+        composable("profile_setup") {
+            ProfileSetupScreen(navController, userProfileViewModel)
+        }
         composable("achievements") {
-            // Create analytics viewmodel only when needed
             val analyticsViewModel: AnalyticsViewModel = viewModel()
             AchievementsScreen(navController, analyticsViewModel)
         }

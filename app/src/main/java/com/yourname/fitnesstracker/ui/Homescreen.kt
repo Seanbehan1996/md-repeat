@@ -145,7 +145,7 @@ fun HomeScreen(
             // Secondary navigation buttons row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedButton(
                     onClick = { navController.navigate("history") },
@@ -154,23 +154,36 @@ fun HomeScreen(
                     Icon(
                         imageVector = Icons.Default.History,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("History")
+                    Text("History", style = MaterialTheme.typography.bodySmall)
                 }
 
                 OutlinedButton(
-                    onClick = { navController.navigate("analytics") },
+                    onClick = { navController.navigate("goals") },
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Analytics,
+                        imageVector = Icons.Default.Flag,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Analytics")
+                    Text("Goals", style = MaterialTheme.typography.bodySmall)
+                }
+
+                OutlinedButton(
+                    onClick = { navController.navigate("achievements") },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.EmojiEvents,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Awards", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
